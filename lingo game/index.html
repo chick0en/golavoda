@@ -1,28 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lingo Game</title>
-  <link rel="stylesheet" href="style.css" />
+    <title>Lingo Game</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Lingo Game</h1>
-  <div id="legend">
-    <div class="legend-item"><div class="color-box green"></div> Correct letter & position</div>
-    <div class="legend-item"><div class="color-box yellow"></div> Correct letter, wrong position</div>
-    <div class="legend-item"><div class="color-box gray"></div> Incorrect letter</div>
-  </div>
-  <div id="game-board"></div>
-  <div id="input-box">
-    <input type="text" id="guess-input" maxlength="5" placeholder="Guess word" />
-    <button id="submit-btn">Submit</button>
-    <button id="ai-btn">Let AI Play</button>
-    <button id="reset-btn">Reset</button>
-  </div>
-  <div id="reveal-word"></div>
-  <script src="script.js"></script>
+
+    <h1>Lingo Game</h1>
+    <p>Guess the 5-letter word!</p>
+
+    <div id="gameInfo">
+    <p>Attempts Left: <span id="attemptsLeft">6</span></p>
+
+    <button id="hintBtn">
+        Hint
+    </button>
+    </div>
+
+    <div id="board"></div>
+
+    <script src="script.js"></script>
+
 </body>
 </html>
-
-
