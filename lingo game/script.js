@@ -1,91 +1,206 @@
-let words = ["apple", "bread", "chair", "drink", "table"];
-let secretWord = words[Math.floor(Math.random() * words.length)].toLowerCase();
-let attempts = 0;
-const maxAttempts = 5;
-const board = document.getElementById("game-board");
-const input = document.getElementById("guess-input");
-const button = document.getElementById("submit-btn");
-const aiButton = document.getElementById("ai-btn");
-const resetButton = document.getElementById("reset-btn");
-const revealWord = document.getElementById("reveal-word");
+const game = {
+    // secret words that can be answers
+    solutionWords: ["APPLE", "HOUSE", "TRAIN"],
 
-let rows = [];
-let usedGuesses = [];
+    // valid guess words but not answers
+    validGuessWords: ["APPLE", "HOUSE", "TRAIN", "PLANE", "CRANE", "SLATE", "BRICK"]
+};
 
-function initBoard() {
-  board.innerHTML = "";
-  rows = [];
-  for (let r = 0; r < maxAttempts; r++) {
-    const row = [];
-    for (let c = 0; c < 5; c++) {
-      const tile = document.createElement("div");
-      tile.classList.add("tile");
-      board.appendChild(tile);
-      row.push(tile);
+let secretWord;
+
+const MAX_GUESSES = 6;
+const WORD_LENGTH = 5;
+
+let currentRow = 0;
+let currentCol = 0;
+let gameOver = false;
+
+let hintUsed = false;
+
+const attemptsDisplay =
+    document.getElementById("attemptsLeft");
+
+const hintBtn =
+    document.getElementById("hintBtn");
+
+// board
+const board = document.getElementById("board");
+
+function createBoard() {
+    board.innerHTML = "";
+
+    for (let r = 0; r < MAX_GUESSES; r++) {
+        const row = document.createElement("div");
+        row.classList.add("row");
+
+        for (let c = 0; c < WORD_LENGTH; c++) {
+            const cell = document.createElement("div");
+            cell.classList.add("cell");
+            row.appendChild(cell);
+        }
+
+        board.appendChild(row);
     }
-    rows.push(row);
-  }
 }
 
-function checkGuess(guess) {
-  const letters = guess.toLowerCase().split("");
-  const secret = secretWord.split("");
+// new game button
+const restartBtn = document.createElement("button");
+restartBtn.textContent = "New Game";
+restartBtn.style.display = "none";
+restartBtn.onclick = startGame;
+document.body.appendChild(restartBtn);
 
-  for (let i = 0; i < 5; i++) {
-    const tile = rows[attempts][i];
-    tile.textContent = letters[i];
-    tile.classList.remove("green", "yellow", "gray");
-    if (letters[i] === secret[i]) {
-      tile.classList.add("green");
-    } else if (secret.includes(letters[i])) {
-      tile.classList.add("yellow");
-    } else {
-      tile.classList.add("gray");
+// start of game
+function startGame() {
+    secretWord =
+        game.solutionWords[Math.floor(Math.random() * game.solutionWords.length)];
+
+    currentRow = 0;
+    currentCol = 0;
+    gameOver = false;
+    hintUsed = false;
+
+attemptsDisplay.textContent = MAX_GUESSES;
+
+hintBtn.disabled = false;
+
+    restartBtn.style.display = "none";
+
+    createBoard();
+}
+
+startGame();
+
+hintBtn.addEventListener("click", () => {
+
+    if (gameOver) return;
+
+    if (hintUsed) {
+        alert("Hint already used.");
+        return;
     }
-  }
+
+    alert(
+        "The first letter is: " +
+        secretWord[0]
+    );
+
+    hintUsed = true;
+});
+
+
+function getCell(row, col) {
+    return board.children[row].children[col];
 }
 
-function endGame(success) {
-  revealWord.textContent = `The word was: ${secretWord.toUpperCase()}`;
-  button.disabled = true;
-  aiButton.disabled = true;
+function showEndButton() {
+    restartBtn.style.display = "inline-block";
 }
 
-button.addEventListener("click", () => {
-  const guess = input.value.trim();
-  if (guess.length !== 5) return alert("Please enter a 5-letter word.");
-  if (attempts >= maxAttempts) return;
+// input
+document.addEventListener("keydown", (e) => {
+    if (gameOver) return;
 
-  checkGuess(guess);
-  attempts++;
-  input.value = "";
+    const key = e.key;
 
-  if (guess.toLowerCase() === secretWord) {
-    setTimeout(() => alert("🎉 You guessed it right!"), 200);
-    endGame(true);
-  } else if (attempts >= maxAttempts) {
-    setTimeout(() => alert("😢 Out of tries!"), 200);
-    endGame(false);
-  }
+    if (/^[a-zA-Z]$/.test(key)) {
+        if (currentCol < WORD_LENGTH) {
+            getCell(currentRow, currentCol).textContent = key.toUpperCase();
+            currentCol++;
+        }
+    }
+
+    else if (key === "Backspace") {
+        if (currentCol > 0) {
+            currentCol--;
+            getCell(currentRow, currentCol).textContent = "";
+        }
+    }
+
+    else if (key === "Enter") {
+        if (currentCol !== WORD_LENGTH) return;
+
+        let guess = "";
+        for (let i = 0; i < WORD_LENGTH; i++) {
+            guess += getCell(currentRow, i).textContent;
+        }
+
+        // validation
+        if (!game.validGuessWords.includes(guess)) {
+            alert("Not a valid word");
+            return;
+        }
+
+        evaluateGuess(guess);
+    }
 });
 
-aiButton.addEventListener("click", () => {
-  if (attempts >= maxAttempts) return;
-  const aiGuess = words.find(w => !usedGuesses.includes(w)) || "apple";
-  input.value = aiGuess;
-  button.click();
-  usedGuesses.push(aiGuess);
-});
+// duplicate-safe wordle logic 
+function evaluateGuess(guess) {
 
-resetButton.addEventListener("click", () => {
-  secretWord = words[Math.floor(Math.random() * words.length)].toLowerCase();
-  attempts = 0;
-  usedGuesses = [];
-  input.value = "";
-  revealWord.textContent = "";
-  button.disabled = false;
-  aiButton.disabled = false;
-  initBoard();
-});
+    const secretArr = secretWord.split("");
+    const guessArr = guess.split("");
 
-initBoard();
+    const secretUsed = Array(WORD_LENGTH).fill(false);
+
+    // 1st pass: greens
+    for (let i = 0; i < WORD_LENGTH; i++) {
+        const cell = getCell(currentRow, i);
+
+        if (guessArr[i] === secretArr[i]) {
+            cell.classList.add("green");
+            secretUsed[i] = true;
+            guessArr[i] = null;
+        }
+    }
+
+    // 2nd pass: yellows + reds
+    for (let i = 0; i < WORD_LENGTH; i++) {
+        const cell = getCell(currentRow, i);
+
+        if (!cell.classList.contains("green")) {
+
+            let foundIndex = secretArr.findIndex((ch, idx) =>
+                ch === guessArr[i] && !secretUsed[idx]
+            );
+
+            if (foundIndex !== -1) {
+                cell.classList.add("yellow");
+                secretUsed[foundIndex] = true;
+            } else {
+                cell.classList.add("red");
+            }
+        }
+    }
+
+    // when win
+    if (guess === secretWord) {
+    gameOver = true;
+
+    hintBtn.disabled = true;
+
+    setTimeout(() => alert("You won!"), 100);
+    showEndButton();
+    return;
+}
+
+    currentRow++;
+    currentCol = 0;
+    attemptsDisplay.textContent =
+    MAX_GUESSES - currentRow;
+
+    // when lose
+    if (currentRow === MAX_GUESSES) {
+    gameOver = true;
+
+    hintBtn.disabled = true;
+
+    setTimeout(() =>
+        alert("Game over! Word was: " + secretWord),
+    100);
+
+    showEndButton();
+}
+}
+    margin-left: 10px;
+}
