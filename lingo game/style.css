@@ -39,8 +39,8 @@ body {
     color: white;
 }
 
-.red {
-    background-color: red;
+.grey {
+    background-color: grey;
     color: white;
 }
 
@@ -57,4 +57,25 @@ button {
 
 #hintBtn {
     margin-left: 10px;
+}
+
+#legend {
+    margin: 20px 0;
+}
+
+.legend-item {
+    margin: 5px 0;
+}
+
+.legend-box {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+    margin-right: 8px;
+    border: 1px solid black;
+}
+
+.grey {
+    background-color: grey;
 }
