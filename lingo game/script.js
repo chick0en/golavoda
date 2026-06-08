@@ -175,32 +175,22 @@ function evaluateGuess(guess) {
 
     // when win
     if (guess === secretWord) {
-    gameOver = true;
-
-    hintBtn.disabled = true;
-
-    setTimeout(() => alert("You won!"), 100);
-    showEndButton();
-    return;
-}
+        gameOver = true;
+        hintBtn.disabled = true;
+        setTimeout(() => alert("You won!"), 100);
+        showEndButton();
+        return;
+    }
 
     currentRow++;
     currentCol = 0;
-    attemptsDisplay.textContent =
-    MAX_GUESSES - currentRow;
+    attemptsDisplay.textContent = MAX_GUESSES - currentRow;
 
     // when lose
     if (currentRow === MAX_GUESSES) {
-    gameOver = true;
-
-    hintBtn.disabled = true;
-
-    setTimeout(() =>
-        alert("Game over! Word was: " + secretWord),
-    100);
-
-    showEndButton();
-}
-}
-    margin-left: 10px;
+        gameOver = true;
+        hintBtn.disabled = true;
+        setTimeout(() => alert("Game over! Word was: " + secretWord), 100);
+        showEndButton();
+    }
 }
