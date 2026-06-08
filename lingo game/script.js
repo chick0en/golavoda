@@ -168,7 +168,7 @@ function evaluateGuess(guess) {
                 cell.classList.add("yellow");
                 secretUsed[foundIndex] = true;
             } else {
-                cell.classList.add("red");
+                cell.classList.add("grey");
             }
         }
     }
